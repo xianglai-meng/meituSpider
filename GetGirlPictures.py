@@ -17,7 +17,7 @@ def getPicture(url):
     html= respone.read().decode('utf-8') 
     #request.urlretrieve(url=chaper_url,filename='/home/joey/download/1.jpg')
 
-    pattern =re.compile('(?<=<img src=")https?.*?(?=")')
+    pattern =re.compile('(?<=<img .*?src=")https?.*?(?=")')
 
     imgList = pattern.findall(html)
     # 判断是否有SRC=
@@ -78,7 +78,7 @@ def getAllUrl(html,mainUrl):
 
 	#print(html)
 
-	pattern =re.compile('href="(https?.*?[1-9][0-9]{2,15}\.html)')
+	pattern =re.compile('href="(https?.*ishsh.com.*\.html)')
 
 	imgList = pattern.findall(html)
 
