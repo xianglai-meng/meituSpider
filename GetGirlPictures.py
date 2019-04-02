@@ -56,17 +56,18 @@ def getPicture(html1,html2,html3):
                 imgUrl = imgUrlReal[1]
                 print(imgUrl)
             fileName+=1
-            # if  len(historyList)>0:
-            #     if  imgUrl not in historyList:
-            #         request.urlretrieve(url=imgUrl,filename= '/home/joey/download/{}_{}.jpg'.format(currentId.replace('/',''),fileName))
-            #         historyList.append(imgUrl)
-            #         print('*{}*'.format(historyList))   
-            # else:
             namestr='/home/joey/download/{}_{}.jpg'.format(currentId.replace('/',''),fileName)
-            request.urlretrieve(url=imgUrl,filename= namestr)
-            print(namestr)
-            #historyList.append(imgUrl)
-            #print('*{}*'.format(historyList))       
+ 
+            if  len(historyList)>0:             
+                if  namestr not in historyList:
+                    request.urlretrieve(url=imgUrl,filename= namestr)
+                    historyList.append(imgUrl) 
+                    print(namestr)
+            else:           
+                historyList.append(namestr)
+                request.urlretrieve(url=imgUrl,filename= namestr)
+                print(namestr)
+   
 
                        
     except IOError as identifier:
@@ -102,23 +103,30 @@ if __name__ == '__main__':
     mainUrlLists = getAllMainUrl(htmltxt)
 
     urllists = []
-    for mainurl in mainUrlLists:
-        imageUrl = mainUrl+mainurl
-        urllists = getAllUrlOnePage(imageUrl,'ishsh')
-        for url in urllists:
-            #getPicture(mainUrl,url)
 
-            next = getPicture(mainUrl,url,url)
-            current = re.sub("\D","",url)
-            weizhi=0
-            while (len(next)>0 and weizhi>=0):
-                next = getPicture(mainUrl,url,next[0])
-                if len(next)==0:
-                    break
-                weizhi = next[0].find(str(current))
-
-    # next = getPicture(mainUrl,'/25726.html','/25726.html')
-    # current = re.sub("\D","",'/25726.html')
+    try:
+        for mainurl in mainUrlLists:
+            imageUrl = mainUrl+mainurl
+            urllists = getAllUrlOnePage(imageUrl,'ishsh')
+            reIndex=0
+            for url in urllists:
+                #getPicture(mainUrl,url)
+                reIndex+=1
+                if reIndex>1:
+                    fileName=0
+                    next = getPicture(mainUrl,url,url)
+                    current = re.sub("\D","",url)
+                    weizhi=0
+                    while (weizhi>=0):
+                        next = getPicture(mainUrl,url,next[0])
+                        if len(next)==0:
+                            break
+                        weizhi = next[0].find(str(current))
+  
+    except expression as identifier:
+        pass
+    # next = getPicture(mainUrl,'/25726.html','/25726_17.html')
+    # current = re.sub("\D","",'/25726_17.html')
     # weizhi=0
     # while len(next)>0&weizhi>=0:
     #     next = getPicture(mainUrl,'/25726.html',next[0])
