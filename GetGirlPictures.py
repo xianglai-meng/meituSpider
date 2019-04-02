@@ -42,43 +42,32 @@ def getPicture(html1,html2,html3):
     reimg=r'<img.*?(src=)?"(https?.*?.jpg)"'
     pattern =re.compile(reimg)
     imgurl = pattern.findall(str(img))
-    print(imgurl)
+    #print(imgurl)
     # 判断是否有SRC=
     global fileName 
     global historyList 
     #imgList.remove(imgList[1])
     try:
-            # patterSub= re.findall('[^\x00-\xff]',img)
-            # if  len(patterSub)>0:
-            #     continue
-            #index = img.find('src')
-            
-            #if index>0:
-        #imgUrl = imgurlstr.split('src=')[1]
+
         index = len(imgurl)
         if index>0:
             imgUrlReal=imgurl[0]
             if len(imgUrlReal)>1:
                 imgUrl = imgUrlReal[1]
                 print(imgUrl)
-        fileName+=1
-        if  len(historyList)>0:
-            if  imgUrl not in historyList:
-                request.urlretrieve(url=imgUrl,filename= '/home/bing/download/{}_{}.jpg'.format(currentId.replace('/',''),fileName))
-                historyList.append(imgUrl)
-                print('*{}*'.format(historyList))   
-        else:
-            request.urlretrieve(url=imgUrl,filename= '/home/bing/download/{}_{}.jpg'.format(currentId.replace('/',''),fileName))
-            historyList.append(imgUrl)
-            print('*{}*'.format(historyList))       
-            # else:    
-            #     fileName+=1
-            #     if  len(historyList)>0:
-            #         if  img not in historyList:
-            #             request.urlretrieve(url=img,filename= '/home/joey/download/{}.jpg'.format(fileName))
-            #             print(img)
-            #             print('*'*50)
-            #             print(historyList)
+            fileName+=1
+            # if  len(historyList)>0:
+            #     if  imgUrl not in historyList:
+            #         request.urlretrieve(url=imgUrl,filename= '/home/joey/download/{}_{}.jpg'.format(currentId.replace('/',''),fileName))
+            #         historyList.append(imgUrl)
+            #         print('*{}*'.format(historyList))   
+            # else:
+            namestr='/home/joey/download/{}_{}.jpg'.format(currentId.replace('/',''),fileName)
+            request.urlretrieve(url=imgUrl,filename= namestr)
+            print(namestr)
+            #historyList.append(imgUrl)
+            #print('*{}*'.format(historyList))       
+
                        
     except IOError as identifier:
         pass
@@ -91,12 +80,6 @@ def getAllUrlOnePage(html,mainUrl):
     #print(htmlcontent)
     return imgList
 
-# def getAllUrlOnePage(html,mainUrl):
-#     htmlcontent =getHtml(html)
-#     pattern =re.compile('href="(https?.*ishsh.com.*\.html)')
-#     imgList = pattern.findall(htmlcontent)
-#     print(htmlcontent)
-#     return imgList
 
 def getAllMainUrl(html):
     soup = BeautifulSoup(html, 'html.parser')  
@@ -111,24 +94,34 @@ def getAllMainUrl(html):
 
     return mainUrlList
 
+
 if __name__ == '__main__':
     mainUrl = "https://www.ishsh.com"
-    # htmltxt = getHtml(mainUrl+"/gaoqing")
+    htmltxt = getHtml(mainUrl+"/gaoqing")
 
-    # mainUrlLists = getAllMainUrl(htmltxt)
+    mainUrlLists = getAllMainUrl(htmltxt)
 
-    # urllists = []
-    # for mainurl in mainUrlLists:
-    #     imageUrl = mainUrl+mainurl
-    #     urllists = getAllUrlOnePage(imageUrl,'ishsh')
-    #     for url in urllists:
-    #         getPicture(mainUrl,url)
+    urllists = []
+    for mainurl in mainUrlLists:
+        imageUrl = mainUrl+mainurl
+        urllists = getAllUrlOnePage(imageUrl,'ishsh')
+        for url in urllists:
+            #getPicture(mainUrl,url)
 
-    next = getPicture(mainUrl,'/25726.html','/25726.html')
-    current = re.sub("\D","",'/25726.html')
-    weizhi=0
-    while len(next)>0&weizhi>=0:
-        next = getPicture(mainUrl,'/25726.html',next[0])
-        weizhi = next[0].find(str(current))
+            next = getPicture(mainUrl,url,url)
+            current = re.sub("\D","",url)
+            weizhi=0
+            while (len(next)>0 and weizhi>=0):
+                next = getPicture(mainUrl,url,next[0])
+                if len(next)==0:
+                    break
+                weizhi = next[0].find(str(current))
+
+    # next = getPicture(mainUrl,'/25726.html','/25726.html')
+    # current = re.sub("\D","",'/25726.html')
+    # weizhi=0
+    # while len(next)>0&weizhi>=0:
+    #     next = getPicture(mainUrl,'/25726.html',next[0])
+    #     weizhi = next[0].find(str(current))
         
     
