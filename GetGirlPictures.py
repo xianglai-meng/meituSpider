@@ -3,6 +3,7 @@
 from urllib import request
 import re
 from bs4 import BeautifulSoup
+import time
 
 fileName = 0
 historyList=[]
@@ -141,6 +142,7 @@ if __name__ == '__main__':
                         if len(next)==0:
                             break
                         weizhi = next[0].find(str(current))
+                        time.sleep(0.02)
                 except IOError as e:
                     pass
     except IOError as e:
