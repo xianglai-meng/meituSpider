@@ -27,15 +27,14 @@ def getPicture(html1,html2,html3):
     retxt ='<a class.*?href="{}.*?html".*?<img.*?a>'.format(currentId)
     patternC=re.compile(retxt)
     img = patternC.findall(htmlcontent)
-    print(img)
+    #print(img)
 
     nextretxt ='href="({}.*?html)"'.format(currentId)
     nextpatternC=re.compile(nextretxt)
     nextimg = nextpatternC.findall(str(img))
-    print(nextimg)
+    #print(nextimg)
     #print(htmlcontent)
 
-    # pattern =re.compile('(?<=<img.*?src=")https?.*?(?=")')
     #原有方式:
     # pattern =re.compile('<img.*?(src=)?"(https?.*?.jpg)"')
     # imgList = pattern.findall(htmlcontent)
@@ -56,7 +55,7 @@ def getPicture(html1,html2,html3):
                 imgUrl = imgUrlReal[1]
                 print(imgUrl)
             fileName+=1
-            namestr='/home/joey/download/{}_{}.jpg'.format(currentId.replace('/',''),fileName)
+            namestr='/home/bing/download/{}_{}.jpg'.format(currentId.replace('/',''),fileName)
  
             if  len(historyList)>0:             
                 if  namestr not in historyList:
@@ -98,32 +97,53 @@ def getAllMainUrl(html):
 
 if __name__ == '__main__':
     mainUrl = "https://www.ishsh.com"
+
     htmltxt = getHtml(mainUrl+"/gaoqing")
+    #1、找出网站目录
+    mainUrlLists= getAllMainUrl(htmltxt)
 
-    mainUrlLists = getAllMainUrl(htmltxt)
-
+    pageIndex=1    
     urllists = []
 
     try:
+        #2、循环所有主目录
         for mainurl in mainUrlLists:
-            imageUrl = mainUrl+mainurl
-            urllists = getAllUrlOnePage(imageUrl,'ishsh')
-            reIndex=0
+            
+            while (True):
+                after ="/page/{}".format(pageIndex)
+                imageUrl = mainUrl+mainurl+after  
+                #3、找出单页面所有图集         
+                tempList = getAllUrlOnePage(imageUrl,'ishsh')
+                if len(tempList)==0:
+                    break;
+               #3.2单页面中的下拉刷新
+                urllists+=tempList
+                pageIndex+=1
+
+            # 去重
+            #print(urllists)
+            urllists = list(set(urllists))
+            #print(urllists)
+            #reIndex=0
+            #4、循环单页面所有地址
             for url in urllists:
-                #getPicture(mainUrl,url)
-                reIndex+=1
-                if reIndex>1:
-                    fileName=0
+
+                # reIndex+=1
+                # if reIndex>1:
+                fileName=0
+                try:
+                    #5、循环单个图集
                     next = getPicture(mainUrl,url,url)
                     current = re.sub("\D","",url)
                     weizhi=0
-                    while (weizhi>=0):
+                    while (len(next)>0 and weizhi>=0):
                         next = getPicture(mainUrl,url,next[0])
                         if len(next)==0:
                             break
                         weizhi = next[0].find(str(current))
-  
-    except expression as identifier:
+                except IOError as e:
+                    pass
+    except IOError as e:
         pass
     # next = getPicture(mainUrl,'/25726.html','/25726_17.html')
     # current = re.sub("\D","",'/25726_17.html')
