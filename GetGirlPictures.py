@@ -4,8 +4,10 @@ from urllib import request
 import re
 from bs4 import BeautifulSoup
 import time
+import threading
+from multiprocessing.dummy import Pool 
 
-fileName = 0
+#fileName = 0
 historyList=[]
 
 def getHtml(url):
@@ -19,7 +21,7 @@ def getHtml(url):
     html= respone.read().decode('utf-8') 
     return html
 
-def getPicture(html1,html2,html3):
+def getPicture(html1,html2,html3,fileName):
     #html=html1+html2
     html=html1+html3
     htmlcontent = getHtml(html)
@@ -44,7 +46,7 @@ def getPicture(html1,html2,html3):
     imgurl = pattern.findall(str(img))
     #print(imgurl)
     # 判断是否有SRC=
-    global fileName 
+
     global historyList 
     #imgList.remove(imgList[1])
     try:
@@ -66,9 +68,7 @@ def getPicture(html1,html2,html3):
             else:           
                 historyList.append(namestr)
                 request.urlretrieve(url=imgUrl,filename= namestr)
-                print(namestr)
-   
-
+                print(namestr)  
                        
     except IOError as identifier:
         pass
@@ -95,6 +95,26 @@ def getAllMainUrl(html):
 
     return mainUrlList
 
+#def getPictureOnePage(mainUrl,url,fileName):
+def getPictureOnePage(url):
+    try:
+        global fileName
+        global mainUrl
+        #5、循环单个图集
+        next = getPicture(mainUrl,url,url,fileName)
+        fileName+=1
+        current = re.sub("\D","",url)
+        weizhi=0
+        while (len(next)>0 and weizhi>=0):
+            next = getPicture(mainUrl,url,next[0],fileName)
+            fileName+=1
+            if len(next)==0:
+                break
+            weizhi = next[0].find(str(current))
+            time.sleep(0.02)
+    except IOError as e:
+        pass
+
 
 if __name__ == '__main__':
     mainUrl = "https://www.ishsh.com"
@@ -116,7 +136,7 @@ if __name__ == '__main__':
                 #3、找出单页面所有图集         
                 tempList = getAllUrlOnePage(imageUrl,'ishsh')
                 if len(tempList)==0:
-                    break;
+                    break
                #3.2单页面中的下拉刷新
                 urllists+=tempList
                 pageIndex+=1
@@ -126,25 +146,42 @@ if __name__ == '__main__':
             urllists = list(set(urllists))
             #print(urllists)
             #reIndex=0
+
+            threads = []
+            rangeNum=1
+            rangeLoops=5
+
+            fileName=0
             #4、循环单页面所有地址
             for url in urllists:
-
-                # reIndex+=1
-                # if reIndex>1:
                 fileName=0
-                try:
-                    #5、循环单个图集
-                    next = getPicture(mainUrl,url,url)
-                    current = re.sub("\D","",url)
-                    weizhi=0
-                    while (len(next)>0 and weizhi>=0):
-                        next = getPicture(mainUrl,url,next[0])
-                        if len(next)==0:
-                            break
-                        weizhi = next[0].find(str(current))
-                        time.sleep(0.02)
-                except IOError as e:
-                    pass
+                if rangeNum<rangeLoops:
+                    for i in range(rangeNum,rangeLoops):#创建10个线程
+                        if len(urllists)>0:
+                            urllists.pop(0)
+                            threads.append(url)
+   
+                            rangeNum+=1
+                            break  
+
+                else:
+                    # if len(urllists)>0:
+                    #     t=url
+                    #     urllists.pop(0)
+                    #     threads.append(t)
+
+                    #     rangeNum+=1
+                #getPictureOnePage(mainUrl,url,fileName)
+                #getPictureOnePage(url)
+                    pools = Pool(2)
+                    pools.map(getPictureOnePage,threads)
+                    pools.close()
+                    pools.join()
+
+                    rangeNum=0
+                    fileName=0
+
+
     except IOError as e:
         pass
     # next = getPicture(mainUrl,'/25726.html','/25726_17.html')
