@@ -151,10 +151,11 @@ if __name__ == '__main__':
             urllists = list(set(urllists))
             #print(urllists)
             #reIndex=0
-
+            print('数量是{}'.format(len(urllists)))
+            print('*'*100)
             threads = []
             rangeNum=1
-            rangeLoops=5
+            rangeLoops=20
 
             fileName=0
             #4、循环单页面所有地址
@@ -178,7 +179,7 @@ if __name__ == '__main__':
                     #     rangeNum+=1
                 #getPictureOnePage(mainUrl,url,fileName)
                 #getPictureOnePage(url)
-                    pools = Pool(5)
+                    pools = Pool(rangeLoops)
                     pools.map(getPictureOnePage,threads)
                     pools.close()                   
                     pools.join()
