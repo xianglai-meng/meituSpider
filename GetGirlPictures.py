@@ -58,17 +58,17 @@ def getPicture(html1,html2,html3,fileName):
                 imgUrl = imgUrlReal[1]
                 print(imgUrl)
             fileName+=1
-            namestr='/home/bing/download/{}_{}.jpg'.format(currentId.replace('/',''),fileName)
+            namestr='/home/joey/download/{}_{}.jpg'.format(currentId.replace('/',''),fileName)
  
-            if  len(historyList)>0:             
-                if  namestr not in historyList:
+            if  len(historyList)>=0:             
+                if  imgUrl not in historyList:
                     request.urlretrieve(url=imgUrl,filename= namestr)
                     historyList.append(imgUrl) 
                     print(namestr)
-            else:           
-                historyList.append(namestr)
-                request.urlretrieve(url=imgUrl,filename= namestr)
-                print(namestr)  
+            # else:           
+            #     historyList.append(namestr)
+            #     request.urlretrieve(url=imgUrl,filename= namestr)
+            #     print(namestr)  
                        
     except IOError as identifier:
         pass
@@ -102,14 +102,19 @@ def getPictureOnePage(url):
         global mainUrl
         #5、循环单个图集
         next = getPicture(mainUrl,url,url,fileName)
-        fileName+=1
+        
         current = re.sub("\D","",url)
         weizhi=0
-        while (len(next)>0 and weizhi>=0):
-            next = getPicture(mainUrl,url,next[0],fileName)
+        imgsHistory=[]
+        while (len(next)>=0 and weizhi>=0):
             fileName+=1
+            next = getPicture(mainUrl,url,next[0],fileName)
+            
             if len(next)==0:
                 break
+            if next[0] in imgsHistory:
+                break   
+            imgsHistory.append(next[0])   
             weizhi = next[0].find(str(current))
             time.sleep(0.02)
     except IOError as e:
@@ -129,7 +134,7 @@ if __name__ == '__main__':
     try:
         #2、循环所有主目录
         for mainurl in mainUrlLists:
-            
+            print(mainurl)
             while (True):
                 after ="/page/{}".format(pageIndex)
                 imageUrl = mainUrl+mainurl+after  
@@ -173,10 +178,11 @@ if __name__ == '__main__':
                     #     rangeNum+=1
                 #getPictureOnePage(mainUrl,url,fileName)
                 #getPictureOnePage(url)
-                    pools = Pool(2)
+                    pools = Pool(5)
                     pools.map(getPictureOnePage,threads)
-                    pools.close()
+                    pools.close()                   
                     pools.join()
+
 
                     rangeNum=0
                     fileName=0
