@@ -106,7 +106,7 @@ def getPictureOnePage(url):
         current = re.sub("\D","",url)
         weizhi=0
         imgsHistory=[]
-        while (len(next)>=0 and weizhi>=0):
+        while (len(next)>0 and weizhi>=0):
             fileName+=1
             next = getPicture(mainUrl,url,next[0],fileName)
             
