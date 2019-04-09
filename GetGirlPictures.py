@@ -154,23 +154,36 @@ if __name__ == '__main__':
             print('数量是{}'.format(len(urllists)))
             print('*'*100)
             threads = []
-            rangeNum=1
-            rangeLoops=20
+            rangeNum=0
+            rangeLoops=8
 
             fileName=0
             #4、循环单页面所有地址
             for url in urllists:
                 fileName=0
-                if rangeNum<rangeLoops:
-                    for i in range(rangeNum,rangeLoops):#创建10个线程
-                        if len(urllists)>0:
-                            urllists.pop(0)
-                            threads.append(url)
-   
-                            rangeNum+=1
-                            break  
+                #if rangeNum<rangeLoops:
+                for i in range(rangeNum,rangeLoops):#创建10个线程
+                    index = urllists.index(url)
+                    if index<len(urllists):
+                        t =threading.Thread(target=getPictureOnePage,args=(url,))
 
-                else:
+          
+                        #threads.append(url)
+                        threads.append(t)
+
+                        rangeNum+=1
+                        #break  
+                    if (rangeNum==rangeLoops):
+                        for t in threads:
+                            t.start()
+                        for m in range(1,rangeLoops):
+                            threads[m].join()
+
+                        rangeNum=0
+                        fileName=0
+                        threads.clear()
+                    break    
+                #else:
                     # if len(urllists)>0:
                     #     t=url
                     #     urllists.pop(0)
@@ -179,14 +192,11 @@ if __name__ == '__main__':
                     #     rangeNum+=1
                 #getPictureOnePage(mainUrl,url,fileName)
                 #getPictureOnePage(url)
-                    pools = Pool(rangeLoops)
-                    pools.map(getPictureOnePage,threads)
-                    pools.close()                   
-                    pools.join()
-
-
-                    rangeNum=0
-                    fileName=0
+                    # pools = Pool(rangeLoops)
+                    # pools.map(getPictureOnePage,threads)
+                    # pools.close()                   
+                    # pools.join()
+                    
 
 
     except IOError as e:
