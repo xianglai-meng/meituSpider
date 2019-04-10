@@ -58,7 +58,7 @@ def getPicture(html1,html2,html3,fileName):
                 imgUrl = imgUrlReal[1]
                 print(imgUrl)
             fileName+=1
-            namestr='/home/bing/download/{}_{}.jpg'.format(currentId.replace('/',''),fileName)
+            namestr='/home/joey/download/{}_{}.jpg'.format(currentId.replace('/',''),fileName)
  
             if  len(historyList)>=0:             
                 if  imgUrl not in historyList:
@@ -101,8 +101,9 @@ def getAllMainUrl(html):
 #def getPictureOnePage(mainUrl,url,fileName):
 def getPictureOnePage(url):
     try:
-        global fileName
+        #global fileName
         global mainUrl
+        fileName =1
         #5、循环单个图集
         next = getPicture(mainUrl,url,url,fileName)
         
@@ -146,6 +147,8 @@ if __name__ == '__main__':
         #2、循环所有主目录
         for mainurl in mainUrlLists:
             pageIndex=1   
+            if len(urllists)>0:
+                urllists.clear()
             print(mainurl)
             while (True):
                 after ="/page/{}".format(pageIndex)
@@ -159,58 +162,49 @@ if __name__ == '__main__':
                 pageIndex+=1
 
             # 去重
-            #print(urllists)
             ##urllists = list(set(urllists))
             urllists = delSame(urllists)
             #print(urllists)
-            #reIndex=0
+
             print('数量是{}'.format(len(urllists)))
             print('*'*100)
             threads = []
             rangeNum=0
-            rangeLoops=8
+            rangeLoops=4
 
-            # fileName=0
-            # #4、循环单页面所有地址
-            # for url in urllists:
-            #     fileName=0
-            #     #if rangeNum<rangeLoops:
-            #     for i in range(rangeNum,rangeLoops):#创建10个线程
-            #         index = urllists.index(url)
-            #         if index<len(urllists):
-            #             t =threading.Thread(target=getPictureOnePage,args=(url,))
+            #4、循环单页面所有地址
+            for url in urllists:
+                fileName=0
 
-          
-            #             #threads.append(url)
-            #             threads.append(t)
+                #if rangeNum<rangeLoops:
+                for i in range(rangeNum,rangeLoops):#创建10个线程
+                    index = urllists.index(url)
+                    if index<len(urllists):
+                        t =threading.Thread(target=getPictureOnePage,args=(url,))
+                        #urllists.pop()
+                        #threads.append(url)
+                        threads.append(t)
 
-            #             rangeNum+=1
-            #             #break  
-            #         if (rangeNum==rangeLoops):
-            #             for t in threads:
-            #                 t.start()
-            #             for m in range(1,rangeLoops):
-            #                 threads[m].join()
+                        rangeNum+=1
+                        #break  
+                    if (rangeNum==rangeLoops):
+                        rangeNum=0
+                        for t in threads:
+                            t.start()
+                        for m in range(rangeNum+1,rangeLoops):
+                            threads[m].join()
+                       
+                        threads.clear()
+                    break    
 
-            #             rangeNum=0
-            #             fileName=0
-            #             threads.clear()
-            #         break    
-            #     #else:
-            #         # if len(urllists)>0:
-            #         #     t=url
-            #         #     urllists.pop(0)
-            #         #     threads.append(t)
-
-            #         #     rangeNum+=1
-            #     #getPictureOnePage(mainUrl,url,fileName)
-            #     #getPictureOnePage(url)
-            #         # pools = Pool(rangeLoops)
-            #         # pools.map(getPictureOnePage,threads)
-            #         # pools.close()                   
-            #         # pools.join()
+                #getPictureOnePage(mainUrl,url,fileName)
+                #getPictureOnePage(url)
+                    # pools = Pool(rangeLoops)
+                    # pools.map(getPictureOnePage,threads)
+                    # pools.close()                   
+                    # pools.join()
                     
-
+        print("完成后退出")
 
     except IOError as e:
         pass
