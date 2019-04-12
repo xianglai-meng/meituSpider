@@ -171,7 +171,6 @@ if __name__ == '__main__':
 
             #4、循环单页面所有地址
             for url in urllists:
-                fileName=0
 
                 #if rangeNum<rangeLoops:
                 for i in range(rangeNum,rangeLoops):#创建10个线程
@@ -206,11 +205,6 @@ if __name__ == '__main__':
 
     except IOError as e:
         pass
-    # next = getPicture(mainUrl,'/25726.html','/25726_17.html')
-    # current = re.sub("\D","",'/25726_17.html')
-    # weizhi=0
-    # while len(next)>0&weizhi>=0:
-    #     next = getPicture(mainUrl,'/25726.html',next[0])
-    #     weizhi = next[0].find(str(current))
+
         
     
