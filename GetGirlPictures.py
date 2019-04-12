@@ -48,7 +48,7 @@ def getPicture(html1,html2,html3,fileName):
     # 判断是否有SRC=
 
     global historyList 
-    #imgList.remove(imgList[1])
+
     try:
 
         index = len(imgurl)
@@ -58,18 +58,15 @@ def getPicture(html1,html2,html3,fileName):
                 imgUrl = imgUrlReal[1]
                 print(imgUrl)
             fileName+=1
-            namestr='/home/joey/download/{}_{}.jpg'.format(currentId.replace('/',''),fileName)
+            namestr='/home/bing/download/{}_{}.jpg'.format(currentId.replace('/',''),fileName)
  
             if  len(historyList)>=0:             
                 if  imgUrl not in historyList:
                     request.urlretrieve(url=imgUrl,filename= namestr)
                     historyList.append(imgUrl) 
                     print(namestr)
-            # else:           
-            #     historyList.append(namestr)
-            #     request.urlretrieve(url=imgUrl,filename= namestr)
-            #     print(namestr)  
-                       
+
+                      
     except IOError as identifier:
         pass
     return nextimg 
@@ -101,7 +98,7 @@ def getAllMainUrl(html):
 #def getPictureOnePage(mainUrl,url,fileName):
 def getPictureOnePage(url):
     try:
-        #global fileName
+
         global mainUrl
         fileName =1
         #5、循环单个图集
@@ -170,7 +167,7 @@ if __name__ == '__main__':
             print('*'*100)
             threads = []
             rangeNum=0
-            rangeLoops=4
+            rangeLoops=8
 
             #4、循环单页面所有地址
             for url in urllists:
@@ -183,6 +180,7 @@ if __name__ == '__main__':
                         t =threading.Thread(target=getPictureOnePage,args=(url,))
                         #urllists.pop()
                         #threads.append(url)
+
                         threads.append(t)
 
                         rangeNum+=1
