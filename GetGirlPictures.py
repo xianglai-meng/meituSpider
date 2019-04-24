@@ -4,8 +4,9 @@ from urllib import request
 import re
 from bs4 import BeautifulSoup
 import time
-import threading
-from multiprocessing.dummy import Pool 
+# import threading
+# from multiprocessing.dummy import Pool 
+from threading import Thread
 
 #fileName = 0
 historyList=[]
@@ -95,32 +96,41 @@ def getAllMainUrl(html):
 
     return mainUrlList
 
-#def getPictureOnePage(mainUrl,url,fileName):
-def getPictureOnePage(url):
-    try:
+class downloadImageThread(Thread):
+    def __init__(self,url):
+        Thread.__init__(self)
+        self.url=url
 
-        global mainUrl
-        fileName =1
-        #5、循环单个图集
-        next = getPicture(mainUrl,url,url,fileName)
-        
-        current = re.sub("\D","",url)
-        weizhi=0
-        imgsHistory=[]
-        while (len(next)>0 and weizhi>=0):
-            fileName+=1
-            next = getPicture(mainUrl,url,next[0],fileName)
+#def getPictureOnePage(mainUrl,url,fileName):
+    def getPictureOnePage(self,url):
+        try:
+
+            global mainUrl
+            fileName =1
+            #5、循环单个图集
+            next = getPicture(mainUrl,url,url,fileName)
             
-            #考虑一下，可能是去重
-            if len(next)==0:
-                break
-            if next[0] in imgsHistory:
-                break   
-            imgsHistory.append(next[0])   
-            weizhi = next[0].find(str(current))
-            time.sleep(0.02)
-    except IOError as e:
-        pass
+            current = re.sub("\D","",url)
+            weizhi=0
+            imgsHistory=[]
+            while (len(next)>0 and weizhi>=0):
+                fileName+=1
+                next = getPicture(mainUrl,url,next[0],fileName)
+                
+                #考虑一下，可能是去重
+                if len(next)==0:
+                    break
+                if next[0] in imgsHistory:
+                    break   
+                imgsHistory.append(next[0])   
+                weizhi = next[0].find(str(current))
+                time.sleep(0.02)
+        except IOError as e:
+            pass
+    def run(self):
+       self.getPictureOnePage(self.url)
+
+
 
 def delSame(ilist):
     olist = []
@@ -167,7 +177,7 @@ if __name__ == '__main__':
             print('*'*100)
             threads = []
             rangeNum=0
-            rangeLoops=8
+            rangeLoops=20
 
             #4、循环单页面所有地址
             for url in urllists:
@@ -176,21 +186,21 @@ if __name__ == '__main__':
                 for i in range(rangeNum,rangeLoops):#创建10个线程
                     index = urllists.index(url)
                     if index<len(urllists):
-                        t =threading.Thread(target=getPictureOnePage,args=(url,))
-                        #urllists.pop()
-                        #threads.append(url)
-
+                      #  t =threading.Thread(target=getPictureOnePage,args=(url,))
+                        t=downloadImageThread(url)
                         threads.append(t)
+                        t.start()
 
                         rangeNum+=1
                         #break  
                     if (rangeNum==rangeLoops):
                         rangeNum=0
+                        # for t in threads:
+                        #     t.start()
+                        # for m in range(rangeNum+1,rangeLoops+1):
+                        #     threads[m].join()
                         for t in threads:
-                            t.start()
-                        for m in range(rangeNum+1,rangeLoops):
-                            threads[m].join()
-                       
+                            t.join()
                         threads.clear()
                     break    
 
