@@ -29,4 +29,10 @@ def getAllUrl(html,mainUrl):
 
 
 if __name__ == '__main__':
-	getAllUrl('https://www.ishsh.com/','ishsh')
+	#getAllUrl('https://www.ishsh.com/','ishsh')
+	for x in range(1,10):
+		print(x)
+	str1="1234"
+	str2="a"
+	s=str1.find(str2)
+	print(s)

@@ -7,9 +7,10 @@ import time
 # import threading
 # from multiprocessing.dummy import Pool 
 from threading import Thread
+import os
 
-#fileName = 0
 historyList=[]
+directory=""
 
 def getHtml(url):
     opener=request.build_opener()
@@ -22,7 +23,7 @@ def getHtml(url):
     html= respone.read().decode('utf-8') 
     return html
 
-def getPicture(html1,html2,html3,fileName):
+def getPicture(html1,html2,html3):
     #html=html1+html2
     html=html1+html3
     htmlcontent = getHtml(html)
@@ -49,7 +50,10 @@ def getPicture(html1,html2,html3,fileName):
     # 判断是否有SRC=
 
     global historyList 
-
+    global directory
+    path="/home/joey/download"+directory
+    if  not os.path.exists(path):
+        os.mkdir(path)
     try:
 
         index = len(imgurl)
@@ -58,8 +62,9 @@ def getPicture(html1,html2,html3,fileName):
             if len(imgUrlReal)>1:
                 imgUrl = imgUrlReal[1]
                 print(imgUrl)
-            fileName+=1
-            namestr='/home/bing/download/{}_{}.jpg'.format(currentId.replace('/',''),fileName)
+            
+            namestr='{}{}'.format(path,html3.replace('.html','.jpg'))
+           # fileName+=1
  
             if  len(historyList)>=0:             
                 if  imgUrl not in historyList:
@@ -106,25 +111,25 @@ class downloadImageThread(Thread):
         try:
 
             global mainUrl
-            fileName =1
-            #5、循环单个图集
-            next = getPicture(mainUrl,url,url,fileName)
-            
-            current = re.sub("\D","",url)
-            weizhi=0
+
+            weizhi=1
             imgsHistory=[]
-            while (len(next)>0 and weizhi>=0):
-                fileName+=1
-                next = getPicture(mainUrl,url,next[0],fileName)
+            #5、循环单个图集
+            next = getPicture(mainUrl,url,url)
+           # imgsHistory.append(next[0])  
+            current = re.sub("\D","",url)
+
+            while (len(next)>0 and weizhi>0):
                 
-                #考虑一下，可能是去重
-                if len(next)==0:
-                    break
                 if next[0] in imgsHistory:
-                    break   
-                imgsHistory.append(next[0])   
-                weizhi = next[0].find(str(current))
-                time.sleep(0.02)
+                    break 
+ 
+                imgsHistory.append(next[0])  
+                next = getPicture(mainUrl,url,next[0])                
+                if next:
+                    weizhi = next[0].find(str(current))  
+
+               # time.sleep(0.02)
         except IOError as e:
             pass
     def run(self):
@@ -157,6 +162,7 @@ if __name__ == '__main__':
             if len(urllists)>0:
                 urllists.clear()
             print(mainurl)
+            directory=mainurl
             while (True):
                 after ="/page/{}".format(pageIndex)
                 imageUrl = mainUrl+mainurl+after  
@@ -176,8 +182,8 @@ if __name__ == '__main__':
             print('数量是{}'.format(len(urllists)))
             print('*'*100)
             threads = []
-            rangeNum=0
-            rangeLoops=20
+            rangeNum=1
+            rangeLoops=11
 
             #4、循环单页面所有地址
             for url in urllists:
@@ -194,14 +200,16 @@ if __name__ == '__main__':
                         rangeNum+=1
                         #break  
                     if (rangeNum==rangeLoops):
-                        rangeNum=0
+                        rangeNum=1
                         # for t in threads:
                         #     t.start()
                         # for m in range(rangeNum+1,rangeLoops+1):
                         #     threads[m].join()
                         for t in threads:
                             t.join()
+                        print("before")
                         threads.clear()
+                        print("after")
                     break    
 
                 #getPictureOnePage(mainUrl,url,fileName)
