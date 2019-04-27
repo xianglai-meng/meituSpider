@@ -24,34 +24,30 @@ def getHtml(url):
     return html
 
 def getPicture(html1,html2,html3):
-    #html=html1+html2
     html=html1+html3
     htmlcontent = getHtml(html)
     currentId= html2.replace('.html','')
     #retxt ='<a class.*?href="\{}.*?html".*?<img.*?(src=)?.*?a>'.format(currentId)
-    retxt ='<a class.*?href="{}.*?html".*?<img.*?a>'.format(currentId)
+    #retxt ='<a class.*?href="{}.*?html".*?<img.*?a>'.format(currentId)
+    retxt ='<a class.*?href=".*?html".*?<img.*?a>'
     patternC=re.compile(retxt)
     img = patternC.findall(htmlcontent)
-    #print(img)
 
+    # 下一页地址
     nextretxt ='href="({}.*?html)"'.format(currentId)
     nextpatternC=re.compile(nextretxt)
     nextimg = nextpatternC.findall(str(img))
-    #print(nextimg)
-    #print(htmlcontent)
 
-    #原有方式:
-    # pattern =re.compile('<img.*?(src=)?"(https?.*?.jpg)"')
-    # imgList = pattern.findall(htmlcontent)
+    # 图片地址
     reimg=r'<img.*?(src=)?"(https?.*?.jpg)"'
     pattern =re.compile(reimg)
     imgurl = pattern.findall(str(img))
     #print(imgurl)
-    # 判断是否有SRC=
+
 
     global historyList 
     global directory
-    path="/home/joey/download"+directory
+    path="/home/bing/download"+directory
     if  not os.path.exists(path):
         os.mkdir(path)
     try:
@@ -64,7 +60,7 @@ def getPicture(html1,html2,html3):
                 print(imgUrl)
             
             namestr='{}{}'.format(path,html3.replace('.html','.jpg'))
-           # fileName+=1
+
  
             if  len(historyList)>=0:             
                 if  imgUrl not in historyList:
@@ -112,22 +108,21 @@ class downloadImageThread(Thread):
 
             global mainUrl
 
-            weizhi=1
-            imgsHistory=[]
+            weizhi=0
+           # imgsHistory=[]
             #5、循环单个图集
             next = getPicture(mainUrl,url,url)
            # imgsHistory.append(next[0])  
             current = re.sub("\D","",url)
 
-            while (len(next)>0 and weizhi>0):
+            while (len(next)>0):
                 
-                if next[0] in imgsHistory:
-                    break 
+                # if next[0] in imgsHistory:
+                #     break 
  
-                imgsHistory.append(next[0])  
+                #imgsHistory.append(next[0])  
                 next = getPicture(mainUrl,url,next[0])                
-                if next:
-                    weizhi = next[0].find(str(current))  
+
 
                # time.sleep(0.02)
         except IOError as e:
@@ -182,36 +177,57 @@ if __name__ == '__main__':
             print('数量是{}'.format(len(urllists)))
             print('*'*100)
             threads = []
-            rangeNum=1
-            rangeLoops=11
+            rangeNum=0
+            rangeLoops=10
 
             #4、循环单页面所有地址
-            for url in urllists:
+            # # for url in urllists:
 
-                #if rangeNum<rangeLoops:
-                for i in range(rangeNum,rangeLoops):#创建10个线程
-                    index = urllists.index(url)
-                    if index<len(urllists):
-                      #  t =threading.Thread(target=getPictureOnePage,args=(url,))
-                        t=downloadImageThread(url)
-                        threads.append(t)
-                        t.start()
+            # #     #if rangeNum<rangeLoops:
+            # #     for i in range(rangeNum,rangeLoops):#创建10个线程
+            # #         index = urllists.index(url)
+            # #         if index<len(urllists):
+            # #           #  t =threading.Thread(target=getPictureOnePage,args=(url,))
+            # #             t=downloadImageThread(url)
+            # #             threads.append(t)
+            # #             t.start()
 
-                        rangeNum+=1
-                        #break  
-                    if (rangeNum==rangeLoops):
-                        rangeNum=1
-                        # for t in threads:
-                        #     t.start()
-                        # for m in range(rangeNum+1,rangeLoops+1):
-                        #     threads[m].join()
-                        for t in threads:
-                            t.join()
-                        print("before")
-                        threads.clear()
-                        print("after")
-                    break    
+            # #             rangeNum+=1
+            # #             #break  
+            # #         if (rangeNum==rangeLoops) or (index==len(urllists)-1):
+            # #             rangeNum=1
 
+            # #             for t in threads:
+            # #                 t.join()
+            # #             print("before")
+            # #             threads.clear()
+            # #             print("after")
+            # #         break    
+
+            threadUrlList=[]
+            while len(urllists)>0:
+
+                for i in range(rangeNum,rangeLoops):
+                    if len(urllists)>i:
+                        threadUrlList.append(urllists[i])
+                for urlItem in threadUrlList:
+                    t=downloadImageThread(urlItem)
+                    threads.append(t)
+                for t in threads:                   
+                    t.start()
+                for t in threads:
+                    t.join()
+
+                for item in threadUrlList:
+                    urllists.remove(item)
+
+                threads.clear()
+                threadUrlList.clear()
+
+                time.sleep(0.5)
+
+
+            # 线程池
                 #getPictureOnePage(mainUrl,url,fileName)
                 #getPictureOnePage(url)
                     # pools = Pool(rangeLoops)
