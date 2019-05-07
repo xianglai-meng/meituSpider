@@ -180,29 +180,7 @@ if __name__ == '__main__':
             rangeNum=0
             rangeLoops=10
 
-            #4、循环单页面所有地址
-            # # for url in urllists:
-
-            # #     #if rangeNum<rangeLoops:
-            # #     for i in range(rangeNum,rangeLoops):#创建10个线程
-            # #         index = urllists.index(url)
-            # #         if index<len(urllists):
-            # #           #  t =threading.Thread(target=getPictureOnePage,args=(url,))
-            # #             t=downloadImageThread(url)
-            # #             threads.append(t)
-            # #             t.start()
-
-            # #             rangeNum+=1
-            # #             #break  
-            # #         if (rangeNum==rangeLoops) or (index==len(urllists)-1):
-            # #             rangeNum=1
-
-            # #             for t in threads:
-            # #                 t.join()
-            # #             print("before")
-            # #             threads.clear()
-            # #             print("after")
-            # #         break    
+            #4、循环单页面所有地址          
 
             threadUrlList=[]
             while len(urllists)>0:
@@ -216,7 +194,7 @@ if __name__ == '__main__':
                 for t in threads:                   
                     t.start()
                 for t in threads:
-                    t.join()
+                    t.join(180)
 
                 for item in threadUrlList:
                     urllists.remove(item)
