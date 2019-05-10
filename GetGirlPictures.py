@@ -49,7 +49,7 @@ def getPicture(html1,html2,html3):
     global directory
     path="/home/bing/download"+directory
     if  not os.path.exists(path):
-        os.mkdir(path)
+        os.makedirs(path)
     try:
 
         index = len(imgurl)
@@ -77,11 +77,23 @@ def getAllUrlOnePage(html,mainUrl):
     htmlcontent =getHtml(html)
     pattern =re.compile('href="(/\d{2,10}\.html)"')
     imgList = pattern.findall(htmlcontent)
-    #print(htmlcontent)
+
     #imgList=list(set(imgList))
     imglists=delSame(imgList)
+
+    urlsoup = BeautifulSoup(htmlcontent, 'html.parser')  
+    img_url = urlsoup.find_all('a',attrs={'class':'img'})
+    img_url = re.findall('href="(/\d{2,20}\.html)"',str(img_url))
+
+    countsoup = BeautifulSoup(htmlcontent, 'html.parser')  
+    imgCount = countsoup.find_all('div',attrs={'class':'btns-sum'})
+    img_count = re.findall('(\d{1,10})',str(imgCount))
+
+   # dic= dict(map(lambda x,y:[x,y],img_url,img_count))
+
     #print(imglists)
-    return imglists
+   # return imglists
+    return img_url,img_count
 
 
 def getAllMainUrl(html):
@@ -98,37 +110,34 @@ def getAllMainUrl(html):
     return mainUrlList
 
 class downloadImageThread(Thread):
-    def __init__(self,url):
+    def __init__(self,url,urlcount):
         Thread.__init__(self)
-        self.url=url
+        self.url = url
+        self.urlcount=urlcount
 
 #def getPictureOnePage(mainUrl,url,fileName):
-    def getPictureOnePage(self,url):
+    def getPictureOnePage(self,url,urlcount):
         try:
 
             global mainUrl
 
-            weizhi=0
-           # imgsHistory=[]
             #5、循环单个图集
-            next = getPicture(mainUrl,url,url)
-           # imgsHistory.append(next[0])  
-            current = re.sub("\D","",url)
+            #next = getPicture(mainUrl,url,url)
+            # while (len(next)>0):                
+            #     next = getPicture(mainUrl,url,next[0])                
 
-            while (len(next)>0):
-                
-                # if next[0] in imgsHistory:
-                #     break 
- 
-                #imgsHistory.append(next[0])  
-                next = getPicture(mainUrl,url,next[0])                
+            #    # time.sleep(0.02)
+            imgcount= int(urlcount[url])
+            for i in range(1,imgcount):
+                imgPage=url.replace('.html','_{}.html'.format(i))
+                getPicture(mainUrl,url,imgPage) 
 
 
-               # time.sleep(0.02)
+
         except IOError as e:
             pass
     def run(self):
-       self.getPictureOnePage(self.url)
+       self.getPictureOnePage(self.url,self.urlcount)
 
 
 
@@ -149,6 +158,11 @@ if __name__ == '__main__':
 
     pageIndex=1    
     urllists = []
+    countlists=[]
+    #temp
+    temp=[]
+    temp.append(mainUrlLists[len(mainUrlLists)-1])
+    mainUrlLists =temp
 
     try:
         #2、循环所有主目录
@@ -158,39 +172,48 @@ if __name__ == '__main__':
                 urllists.clear()
             print(mainurl)
             directory=mainurl
-            while (True):
-                after ="/page/{}".format(pageIndex)
-                imageUrl = mainUrl+mainurl+after  
-                #3、找出单页面所有图集         
-                tempList = getAllUrlOnePage(imageUrl,'ishsh')
-                if len(tempList)==0:
-                    break
-               #3.2单页面中的下拉刷新
-                urllists+=tempList
-                pageIndex+=1
+            #最后一页时error跳出
+            try:
+                while (True):
+                    after ="/page/{}".format(pageIndex)
+                    imageUrl = mainUrl+mainurl+after  
+                    #3、找出单页面所有图集         
+                    tempList = getAllUrlOnePage(imageUrl,'ishsh')
+                    if len(tempList[0])==0:
+                        break
+                    #3.2单页面中的下拉刷新
+                    urllists+=tempList[0]
+                    countlists+=tempList[1]
+                    pageIndex+=1
+            except Exception as identifier:
+                pass
+
 
             # 去重
             ##urllists = list(set(urllists))
             urllists = delSame(urllists)
+            countlists=delSame(countlists)
             #print(urllists)
+            imgdic= dict(map(lambda x,y:[x,y],urllists,countlists))
 
             print('数量是{}'.format(len(urllists)))
             print('*'*100)
             threads = []
             rangeNum=0
-            rangeLoops=10
+            #线程数
+            rangeLoops=1
 
             #4、循环单页面所有地址          
 
             threadUrlList=[]
             while len(urllists)>0:
-
                 for i in range(rangeNum,rangeLoops):
                     if len(urllists)>i:
                         threadUrlList.append(urllists[i])
                 for urlItem in threadUrlList:
-                    t=downloadImageThread(urlItem)
+                    t=downloadImageThread(urlItem,imgdic)
                     threads.append(t)
+
                 for t in threads:                   
                     t.start()
                 for t in threads:
