@@ -191,17 +191,18 @@ if __name__ == '__main__':
 
             # 去重
             ##urllists = list(set(urllists))
-            urllists = delSame(urllists)
-            countlists=delSame(countlists)
+            #此方法不能去重
+            #urllists = delSame(urllists)
+            #countlists=delSame(countlists)
             #print(urllists)
             imgdic= dict(map(lambda x,y:[x,y],urllists,countlists))
 
             print('数量是{}'.format(len(urllists)))
             print('*'*100)
             threads = []
-            rangeNum=0
+            rangeNum=1
             #线程数
-            rangeLoops=10
+            rangeLoops=20
 
             #4、循环单页面所有地址          
 
