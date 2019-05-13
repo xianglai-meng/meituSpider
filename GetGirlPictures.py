@@ -201,7 +201,7 @@ if __name__ == '__main__':
             threads = []
             rangeNum=0
             #线程数
-            rangeLoops=1
+            rangeLoops=10
 
             #4、循环单页面所有地址          
 
@@ -214,10 +214,10 @@ if __name__ == '__main__':
                     t=downloadImageThread(urlItem,imgdic)
                     threads.append(t)
 
-                for t in threads:                   
+                for t in threads:                 
                     t.start()
                 for t in threads:
-                    t.join(180)
+                    t.join(150)
 
                 for item in threadUrlList:
                     urllists.remove(item)
@@ -225,7 +225,7 @@ if __name__ == '__main__':
                 threads.clear()
                 threadUrlList.clear()
 
-                time.sleep(0.5)
+                time.sleep(0.5)  
 
 
             # 线程池
