@@ -81,19 +81,36 @@ def getAllUrlOnePage(html,mainUrl):
     #imgList=list(set(imgList))
     #imglists=delSame(imgList)
 
-    urlsoup = BeautifulSoup(htmlcontent, 'html.parser')  
-    img_url = urlsoup.find_all('a',attrs={'class':'img'})
-    img_url = re.findall('href="(/\d{1,10}\.html)"',str(img_url))
 
-    countsoup = BeautifulSoup(htmlcontent, 'html.parser')  
-    imgCount = countsoup.find_all('div',attrs={'class':'btns-sum'})
-    img_count = re.findall('(\d{1,10})',str(imgCount))
+
+    mainsoup = BeautifulSoup(htmlcontent, 'html.parser')  
+    main = mainsoup.find_all('div',attrs={'class':'post-thumbnail'})
+   # img_url = re.findall('',str(img_url))
+    urlcountdic={}
+    urllist=[]
+    try:
+        for urlandcount in main:
+            #urlsoup = BeautifulSoup(urlandcount, 'html.parser')  
+            #img_url = urlsoup.find_all('a',attrs={'class':'img'})
+
+            img_url = re.findall('href="(/\d{1,10}\.html)"',str(urlandcount))
+
+            #countsoup = BeautifulSoup(urlandcount, 'html.parser')  
+            #imgCount = countsoup.find_all('div',attrs={'class':'btns-sum'})
+
+            img_count = re.findall('<span>(\d{1,10})</span>',str(urlandcount))
+            dict1={img_url[0]:img_count[0]}
+            urlcountdic.update(dict1)
+            urllist.append(img_url[0])
+    except Exception as identifier:
+        pass
+   
 
    # dic= dict(map(lambda x,y:[x,y],img_url,img_count))
 
     #print(imglists)
    # return imglists
-    return img_url,img_count
+    return urllist,urlcountdic
 
 
 def getAllMainUrl(html):
@@ -161,7 +178,7 @@ if __name__ == '__main__':
 
     pageIndex=1    
     urllists = []
-    countlists=[]
+    countlists={}
     #temp
     # temp=[]
     # temp.append(mainUrlLists[len(mainUrlLists)-1])
@@ -186,7 +203,7 @@ if __name__ == '__main__':
                         break
                     #3.2单页面中的下拉刷新
                     urllists+=tempList[0]
-                    countlists+=tempList[1]
+                    countlists.update(tempList[1])
                     pageIndex+=1
             except Exception as identifier:
                 pass
@@ -198,14 +215,14 @@ if __name__ == '__main__':
             #urllists = delSame(urllists)
             #countlists=delSame(countlists)
             #print(urllists)
-            imgdic= dict(map(lambda x,y:[x,y],urllists,countlists))
+           # imgdic= dict(map(lambda x,y:[x,y],urllists,countlists))
 
             print('数量是{}'.format(len(urllists)))
             print('*'*100)
             threads = []
            # rangeNum=1
             #线程数
-            rangeLoops=20       
+            rangeLoops=20      
 
             threadUrlList=[]
             # urlItem='/139.html'
@@ -225,7 +242,7 @@ if __name__ == '__main__':
                         if len(urllists)>i:
                             threadUrlList.append(urllists[i])
                     for urlItem in threadUrlList:
-                        t=downloadImageThread(urlItem,imgdic)
+                        t=downloadImageThread(urlItem,countlists)
                         threads.append(t)
 
                     for t in threads:     
