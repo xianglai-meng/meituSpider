@@ -59,7 +59,7 @@ def getPicture(html1,html2,html3):
                 imgUrl = imgUrlReal[1]
                 print(imgUrl)
             
-            namestr='{}{}'.format(path,html3.replace('.html','.jpg'))
+            namestr='{}{}'.format(path,html3.replace('.html','.000'))
 
  
             if  len(historyList)>=0:             
@@ -160,9 +160,9 @@ if __name__ == '__main__':
     urllists = []
     countlists=[]
     #temp
-    temp=[]
-    temp.append(mainUrlLists[len(mainUrlLists)-1])
-    mainUrlLists =temp
+    # temp=[]
+    # temp.append(mainUrlLists[len(mainUrlLists)-1])
+    # mainUrlLists =temp
 
     try:
         #2、循环所有主目录
@@ -202,31 +202,34 @@ if __name__ == '__main__':
             threads = []
             rangeNum=1
             #线程数
-            rangeLoops=20
-
-            #4、循环单页面所有地址          
+            rangeLoops=20       
 
             threadUrlList=[]
-            while len(urllists)>0:
-                for i in range(rangeNum,rangeLoops):
-                    if len(urllists)>i:
-                        threadUrlList.append(urllists[i])
-                for urlItem in threadUrlList:
-                    t=downloadImageThread(urlItem,imgdic)
-                    threads.append(t)
+            try:
+                #4、循环单页面所有地址   
+                while len(urllists)>0:
+                    for i in range(rangeNum,rangeLoops):
+                        if len(urllists)>i:
+                            threadUrlList.append(urllists[i])
+                    for urlItem in threadUrlList:
+                        t=downloadImageThread(urlItem,imgdic)
+                        threads.append(t)
 
-                for t in threads:                 
-                    t.start()
-                for t in threads:
-                    t.join(150)
+                    for t in threads:     
+                        time.sleep(0.3)              
+                        t.start()
+                    for t in threads:
+                        t.join(100)
 
-                for item in threadUrlList:
-                    urllists.remove(item)
+                    for item in threadUrlList:
+                        urllists.remove(item)
 
-                threads.clear()
-                threadUrlList.clear()
+                    threads.clear()
+                    threadUrlList.clear()
 
-                time.sleep(0.5)  
+            except Exception as identifier:
+                pass
+            
 
 
             # 线程池
