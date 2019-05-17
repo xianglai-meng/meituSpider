@@ -75,15 +75,15 @@ def getPicture(html1,html2,html3):
 
 def getAllUrlOnePage(html,mainUrl):
     htmlcontent =getHtml(html)
-    pattern =re.compile('href="(/\d{2,10}\.html)"')
-    imgList = pattern.findall(htmlcontent)
-
+    # 旧方法
+    # pattern =re.compile('href="(/\d{1,10}\.html)"')
+    # imgList = pattern.findall(htmlcontent)
     #imgList=list(set(imgList))
-    imglists=delSame(imgList)
+    #imglists=delSame(imgList)
 
     urlsoup = BeautifulSoup(htmlcontent, 'html.parser')  
     img_url = urlsoup.find_all('a',attrs={'class':'img'})
-    img_url = re.findall('href="(/\d{2,20}\.html)"',str(img_url))
+    img_url = re.findall('href="(/\d{1,10}\.html)"',str(img_url))
 
     countsoup = BeautifulSoup(htmlcontent, 'html.parser')  
     imgCount = countsoup.find_all('div',attrs={'class':'btns-sum'})
@@ -127,10 +127,13 @@ class downloadImageThread(Thread):
             #     next = getPicture(mainUrl,url,next[0])                
 
             #    # time.sleep(0.02)
+
+            print('地址：{}，图集数量{}'.format(url,urlcount[url]))
             imgcount= int(urlcount[url])
-            for i in range(1,imgcount):
+            for i in range(1,imgcount+1):
                 imgPage=url.replace('.html','_{}.html'.format(i))
                 getPicture(mainUrl,url,imgPage) 
+            print('{}图集下载完毕'.format(url))
 
 
 
@@ -200,15 +203,25 @@ if __name__ == '__main__':
             print('数量是{}'.format(len(urllists)))
             print('*'*100)
             threads = []
-            rangeNum=1
+           # rangeNum=1
             #线程数
             rangeLoops=20       
 
             threadUrlList=[]
+            # urlItem='/139.html'
+            # imgdic={'/139.html':'18'}
+            # t=downloadImageThread(urlItem,imgdic)
+            # threads.append(t)
+            # for t in threads:               
+            #     t.start()
+            # for t in threads:
+            #     t.join(100)
             try:
                 #4、循环单页面所有地址   
                 while len(urllists)>0:
-                    for i in range(rangeNum,rangeLoops):
+                    if rangeLoops>len(urllists):
+                        rangeLoops= len(urllists)
+                    for i in range(rangeLoops):
                         if len(urllists)>i:
                             threadUrlList.append(urllists[i])
                     for urlItem in threadUrlList:
@@ -226,6 +239,7 @@ if __name__ == '__main__':
 
                     threads.clear()
                     threadUrlList.clear()
+                    rangeLoops=20    
 
             except Exception as identifier:
                 pass
