@@ -47,7 +47,7 @@ def getPicture(html1,html2,html3):
 
     global historyList 
     global directory
-    path="/home/bing/download"+directory
+    path="/home/joey/download"+directory
     if  not os.path.exists(path):
         os.makedirs(path)
     try:
@@ -160,9 +160,9 @@ if __name__ == '__main__':
     urllists = []
     countlists=[]
     #temp
-    temp=[]
-    temp.append(mainUrlLists[len(mainUrlLists)-1])
-    mainUrlLists =temp
+    # temp=[]
+    # temp.append(mainUrlLists[len(mainUrlLists)-1])
+    # mainUrlLists =temp
 
     try:
         #2、循环所有主目录
@@ -218,7 +218,7 @@ if __name__ == '__main__':
                 for t in threads:                 
                     t.start()
                 for t in threads:
-                    t.join(150)
+                    t.join(100)
 
                 for item in threadUrlList:
                     urllists.remove(item)
