@@ -9,11 +9,11 @@ import time
 from threading import Thread
 import os
 import datetime
-from collections import deque
+from queue import Queue
 
 #historyList=[]
 
-directory=""
+#directory=""
 
 def getHtml(url):
     opener=request.build_opener()
@@ -69,18 +69,16 @@ def getAllMainUrl(html):
     return mainUrlList
 
 class downloadImageThread(Thread):
-    def __init__(self,mainUrl,url,urlcount,queue):
+    # def __init__(self,mainUrl,url,urlcount,queue):
+    def __init__(self,queue):
         Thread.__init__(self)
-        self.url = url
-        self.urlcount=urlcount
-        self.mainUrl=mainUrl
+        # self.url = url
+        # self.urlcount=urlcount
+        # self.mainUrl=mainUrl
         self.queue=queue
 
-    def getPictureOnePage(self,mainUrl,url,urlcount,queue):
+    def getPictureOnePage(self,directory,mainUrl,url,urlcount):
         try:
-
-          #  global mainUrl
-
             #5、循环单个图集
             #next = getPicture(mainUrl,url,url)
             # while (len(next)>0):                
@@ -91,7 +89,7 @@ class downloadImageThread(Thread):
             imgcount= int(urlcount[url])
             for i in range(1,imgcount+1):
                 imgPage=url.replace('.html','_{}.html'.format(i))
-                self.getPicture(mainUrl,url,imgPage,queue) 
+                self.getPicture(directory,mainUrl,url,imgPage) 
                 #print(imgcount+1)
             print('{}图集下载结束，时间是：{}'.format(url,datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')))    
 
@@ -100,7 +98,7 @@ class downloadImageThread(Thread):
             pass
 
     
-    def getPicture(self,html1,html2,html3,queue):
+    def getPicture(self,directory,html1,html2,html3):
         html=html1+html3
         htmlcontent = getHtml(html)
         #currentId= html2.replace('.html','')
@@ -120,14 +118,12 @@ class downloadImageThread(Thread):
         imgurl = pattern.findall(str(img))
         #print(imgurl)
 
+       # global directory
 
-       # global historyList 
-        global directory
         path="/home/bing/download"+directory
         if  not os.path.exists(path):
             os.makedirs(path)
         try:
-
             index = len(imgurl)
             if index>0:
                 imgUrl=imgurl[0]
@@ -137,17 +133,14 @@ class downloadImageThread(Thread):
                 print(imgUrl)
                 
                 namestr='{}{}'.format(path,html3.replace('.html','.jpg'))
-
-    
-                if  len(queue)>=0:             
+           
                     # if  imgUrl not in historyList:
                     #     request.urlretrieve(url=imgUrl,filename= namestr)
                     #     historyList.append(imgUrl) 
                     #     print(namestr)
-                    if  imgUrl not in queue:
-                        request.urlretrieve(url=imgUrl,filename= namestr)
-                        queue.append(imgUrl) 
-                        print(namestr)
+
+                request.urlretrieve(url=imgUrl,filename= namestr)
+                print(namestr)
 
                         
         except IOError as identifier:
@@ -155,7 +148,13 @@ class downloadImageThread(Thread):
         #return nextimg 
                 
     def run(self):
-       self.getPictureOnePage(self.mainUrl,self.url,self.urlcount,self.queue)
+        if not self.queue.empty():
+            task= self.queue.get()
+            directory=task[0]
+            mainUrl=task[1]
+            url=task[2]
+            urlcount=task[3]
+            self.getPictureOnePage(directory,mainUrl,url,urlcount)
 
 
 
@@ -191,7 +190,8 @@ if __name__ == '__main__':
     # temp.append(mainUrlLists[len(mainUrlLists)-3])
     # mainUrlLists=temp
 
-    hisQ= deque()
+    q= Queue()
+    historyList=[]
     try:
         #2、循环所有主目录
         for mainurl in mainUrlLists:
@@ -212,6 +212,7 @@ if __name__ == '__main__':
                         break
                     #3.2单页面中的下拉刷新
                     urllists+=tempList[0]
+		           # hisQ.put(tempList[0])
                     countlists.update(tempList[1])
                     pageIndex+=1
             except Exception as identifier:
@@ -230,7 +231,7 @@ if __name__ == '__main__':
             threads = []
            # rangeNum=1
             #线程数
-            rangeLoops=20   
+            rangeLoops=20 
 
             threadUrlList=[]
 
@@ -243,9 +244,14 @@ if __name__ == '__main__':
                         rangeLoops=20
                     print('线程开始时间:{}'.format(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
                     for i in range(rangeLoops):
-                        threadUrlList.append(urllists[i])
+                        #threadUrlList.append(urllists[i])
+                        if urllists[i] not in historyList:
+                            historyList.append(urllists[i])
+                            threadUrlList.append(urllists[i])
                     for urlItem in threadUrlList:
-                        t=downloadImageThread(mainUrl,urlItem,countlists,hisQ)
+                        q.put([directory,mainUrl,urlItem,countlists])
+                        #t=downloadImageThread(mainUrl,urlItem,countlists,hisQ)
+                        t=downloadImageThread(q)
                       #  t=threadclass(urlItem)
                         threads.append(t)
 
