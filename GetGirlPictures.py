@@ -258,19 +258,16 @@ if __name__ == '__main__':
                         rangeLoops=5
                     print('线程开始时间:{}'.format(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
 
+                    if len(historyList)>0:
+                        for h in historyList:
+                            urllists.remove(h)
+                            
                     for i in range(rangeLoops):
                         #threadUrlList.append(urllists[i])
                         if urllists[i] not in historyList:
                             historyList.append(urllists[i])
                             threadUrlList.append(urllists[i])
-                            tiaoguo=False
-                        else:                         
-                            tiaoguo=True
-                            break
-                    if tiaoguo:
-                        for x in range(5):
-                            urllists.pop(x)
-                        continue
+
                     for urlItem in threadUrlList:
                         q.put([directory,mainUrl,urlItem,countlists])
                         #t=downloadImageThread(mainUrl,urlItem,countlists,hisQ)
