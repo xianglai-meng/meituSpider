@@ -206,6 +206,8 @@ if __name__ == '__main__':
     q= Queue()
     historyList=[]
     historyList = readfile()
+
+
     try:
         #2、循环所有主目录
         for mainurl in mainUrlLists:
@@ -248,7 +250,10 @@ if __name__ == '__main__':
             rangeLoops=5 
 
             threadUrlList=[]
-            tiaoguo=False
+
+            if len(historyList)>0:
+                for h in historyList:
+                    urllists.remove(h)
             try:
                 #4、循环单页面所有地址   
                 while len(urllists)>0:
@@ -258,10 +263,6 @@ if __name__ == '__main__':
                         rangeLoops=5
                     print('线程开始时间:{}'.format(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
 
-                    if len(historyList)>0:
-                        for h in historyList:
-                            urllists.remove(h)
-                            
                     for i in range(rangeLoops):
                         #threadUrlList.append(urllists[i])
                         if urllists[i] not in historyList:
