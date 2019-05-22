@@ -179,7 +179,7 @@ if __name__ == '__main__':
 
     #temp
     # temp=[]
-    # for x in range(3,7):
+    # for x in range(1,7):
     #     temp.append(mainUrlLists[len(mainUrlLists)-x])
     # mainUrlLists=temp
 
@@ -235,9 +235,9 @@ if __name__ == '__main__':
 
             #去除历史记录中的数据
             if len(historyList)>0:
-                for h in historyList:
-                    if h in urllists:
-                        urllists.remove(h)
+                for ul in urllists:
+                    if ul in historyList:
+                        urllists.remove(ul)
             try:
                 #4、循环单页面所有地址   
                 while len(urllists)>0:
@@ -249,9 +249,9 @@ if __name__ == '__main__':
 
                     for i in range(rangeLoops):
                         #threadUrlList.append(urllists[i])
-                        if urllists[i] not in historyList:
-                            historyList.append(urllists[i])
-                            threadUrlList.append(urllists[i])
+                        #if urllists[i] not in historyList:
+                        historyList.append(urllists[i])
+                        threadUrlList.append(urllists[i])
 
                     for urlItem in threadUrlList:
                         q.put([directory,mainUrl,urlItem,countlists])
