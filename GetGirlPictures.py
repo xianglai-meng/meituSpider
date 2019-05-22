@@ -10,6 +10,7 @@ from threading import Thread
 import os
 import datetime
 from queue import Queue
+import pickle
 
 #historyList=[]
 
@@ -120,7 +121,7 @@ class downloadImageThread(Thread):
 
        # global directory
 
-        path="/home/bing/download"+directory
+        path="/home/joey/download"+directory
         if  not os.path.exists(path):
             os.makedirs(path)
         try:
@@ -175,6 +176,19 @@ class threadclass(Thread):
         time.sleep(3)
         print('线程结束时间_____:{}'.format(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
 
+def writetofile(history):
+    hisfile = open('history.txt','wb')
+    pickle.dump(history,hisfile)
+
+def readfile():
+    if not os.path.exists('history.txt'):
+        open('history.txt','wb')
+
+    hisfile = open('history.txt','rb')
+    his =[]
+    if os.path.getsize('history.txt')>0:
+        his = pickle.load(hisfile)
+    return his
 
 if __name__ == '__main__':
     mainUrl = "https://www.ishsh.com"
@@ -184,14 +198,17 @@ if __name__ == '__main__':
     mainUrlLists= getAllMainUrl(htmltxt)
 
     #temp
-    temp=[]
-    for x in range(4,7):
-        temp.append(mainUrlLists[len(mainUrlLists)-x])        
+    # temp=[]
+    # for x in range(3,7):
+    #     temp.append(mainUrlLists[len(mainUrlLists)-x])
+    # mainUrlLists=temp
 
-    mainUrlLists=temp
 
     q= Queue()
     historyList=[]
+    historyList = readfile()
+
+
     try:
         #2、循环所有主目录
         for mainurl in mainUrlLists:
@@ -231,23 +248,28 @@ if __name__ == '__main__':
             threads = []
            # rangeNum=1
             #线程数
-            rangeLoops=20 
+            rangeLoops=5 
 
             threadUrlList=[]
 
+            if len(historyList)>0:
+                for h in historyList:
+                    urllists.remove(h)
             try:
                 #4、循环单页面所有地址   
                 while len(urllists)>0:
                     if rangeLoops>len(urllists):
                         rangeLoops= len(urllists)
                     else:
-                        rangeLoops=20
+                        rangeLoops=5
                     print('线程开始时间:{}'.format(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
+
                     for i in range(rangeLoops):
                         #threadUrlList.append(urllists[i])
                         if urllists[i] not in historyList:
                             historyList.append(urllists[i])
                             threadUrlList.append(urllists[i])
+
                     for urlItem in threadUrlList:
                         q.put([directory,mainUrl,urlItem,countlists])
                         #t=downloadImageThread(mainUrl,urlItem,countlists,hisQ)
@@ -267,6 +289,7 @@ if __name__ == '__main__':
 
                     threads.clear()
                     threadUrlList.clear()
+                    writetofile(historyList)
                     print('线程结束时间:{}'.format(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
   
 
