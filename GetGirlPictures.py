@@ -184,11 +184,11 @@ if __name__ == '__main__':
     mainUrlLists= getAllMainUrl(htmltxt)
 
     #temp
-    # temp=[]
-    # # temp.append(mainUrlLists[len(mainUrlLists)-1])
-    # # temp.append(mainUrlLists[len(mainUrlLists)-2])
-    # temp.append(mainUrlLists[len(mainUrlLists)-3])
-    # mainUrlLists=temp
+    temp=[]
+    for x in range(4,7):
+        temp.append(mainUrlLists[len(mainUrlLists)-x])        
+
+    mainUrlLists=temp
 
     q= Queue()
     historyList=[]
@@ -260,7 +260,7 @@ if __name__ == '__main__':
                         t.start()
                        # time.sleep(0.3)  
                     for t in threads:
-                        t.join()
+                        t.join(100)
 
                     for item in threadUrlList:
                         urllists.remove(item)
