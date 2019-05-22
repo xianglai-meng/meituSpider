@@ -178,10 +178,10 @@ if __name__ == '__main__':
     mainUrlLists= getAllMainUrl(htmltxt)
 
     #temp
-    # temp=[]
-    # for x in range(1,7):
-    #     temp.append(mainUrlLists[len(mainUrlLists)-x])
-    # mainUrlLists=temp
+    temp=[]
+    for x in range(1,7):
+        temp.append(mainUrlLists[len(mainUrlLists)-x])
+    mainUrlLists=temp
 
 
     q= Queue()
@@ -232,12 +232,16 @@ if __name__ == '__main__':
             rangeLoops=rangeNum
 
             threadUrlList=[]
-
+            deltemp=[]
             #去除历史记录中的数据
             if len(historyList)>0:
                 for ul in urllists:
                     if ul in historyList:
-                        urllists.remove(ul)
+                        deltemp.append(ul)
+            if len(deltemp)>0:
+                for x in deltemp:
+                    urllists.remove(x)        
+                        
             try:
                 #4、循环单页面所有地址   
                 while len(urllists)>0:
