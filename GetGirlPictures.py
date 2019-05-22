@@ -12,9 +12,7 @@ import datetime
 from queue import Queue
 import pickle
 
-#historyList=[]
 
-#directory=""
 
 def getHtml(url):
     opener=request.build_opener()
@@ -29,11 +27,6 @@ def getHtml(url):
 
 def getAllUrlOnePage(html,mainUrl):
     htmlcontent =getHtml(html)
-    # 旧方法
-    # pattern =re.compile('href="(/\d{1,10}\.html)"')
-    # imgList = pattern.findall(htmlcontent)
-    #imgList=list(set(imgList))
-    #imglists=delSame(imgList)
 
     mainsoup = BeautifulSoup(htmlcontent, 'html.parser')  
     main = mainsoup.find_all('div',attrs={'class':'post-thumbnail'})
@@ -52,7 +45,6 @@ def getAllUrlOnePage(html,mainUrl):
     except Exception as identifier:
         pass
    
-   # return imglists
     return urllist,urlcountdic
 
 
@@ -80,17 +72,12 @@ class downloadImageThread(Thread):
 
     def getPictureOnePage(self,directory,mainUrl,url,urlcount):
         try:
-            #5、循环单个图集
-            #next = getPicture(mainUrl,url,url)
-            # while (len(next)>0):                
-            #     next = getPicture(mainUrl,url,next[0])                
-
-            #    # time.sleep(0.02)
 
             imgcount= int(urlcount[url])
             for i in range(1,imgcount+1):
                 imgPage=url.replace('.html','_{}.html'.format(i))
-                self.getPicture(directory,mainUrl,url,imgPage) 
+                self.getPicture(directory,mainUrl,url,imgPage)
+                time.sleep(0.2) 
                 #print(imgcount+1)
             print('{}图集下载结束，时间是：{}'.format(url,datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')))    
 
@@ -102,16 +89,10 @@ class downloadImageThread(Thread):
     def getPicture(self,directory,html1,html2,html3):
         html=html1+html3
         htmlcontent = getHtml(html)
-        #currentId= html2.replace('.html','')
 
         retxt ='<a class.*?href=".*?html".*?<img.*?a>'
         patternC=re.compile(retxt)
         img = patternC.findall(htmlcontent)
-
-        # 下一页地址
-        # nextretxt ='href="({}.*?html)"'.format(currentId)
-        # nextpatternC=re.compile(nextretxt)
-        # nextimg = nextpatternC.findall(str(img))
 
         # 图片地址
         reimg=r'<img.*?src=?"(https?.*?.jpg)"'
@@ -119,9 +100,7 @@ class downloadImageThread(Thread):
         imgurl = pattern.findall(str(img))
         #print(imgurl)
 
-       # global directory
-
-        path="/home/joey/download"+directory
+        path="/home/bing/download"+directory
         if  not os.path.exists(path):
             os.makedirs(path)
         try:
@@ -177,16 +156,17 @@ class threadclass(Thread):
         print('线程结束时间_____:{}'.format(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
 
 def writetofile(history):
-    hisfile = open('history.txt','wb')
+    hisfile = open('/home/bing/download/history.txt','wb')
     pickle.dump(history,hisfile)
 
 def readfile():
-    if not os.path.exists('history.txt'):
-        open('history.txt','wb')
+    filepath='/home/bing/download/history.txt'
+    if not os.path.exists(filepath):
+        open(filepath,'wb')
 
-    hisfile = open('history.txt','rb')
+    hisfile = open(filepath,'rb')
     his =[]
-    if os.path.getsize('history.txt')>0:
+    if os.path.getsize(filepath)>0:
         his = pickle.load(hisfile)
     return his
 
@@ -245,23 +225,26 @@ if __name__ == '__main__':
 
             print('数量是{}'.format(len(urllists)))
             print('*'*100)
+
             threads = []
-           # rangeNum=1
+            rangeNum=20
             #线程数
-            rangeLoops=5 
+            rangeLoops=rangeNum
 
             threadUrlList=[]
 
+            #去除历史记录中的数据
             if len(historyList)>0:
                 for h in historyList:
-                    urllists.remove(h)
+                    if h in urllists:
+                        urllists.remove(h)
             try:
                 #4、循环单页面所有地址   
                 while len(urllists)>0:
                     if rangeLoops>len(urllists):
                         rangeLoops= len(urllists)
                     else:
-                        rangeLoops=5
+                        rangeLoops=rangeNum
                     print('线程开始时间:{}'.format(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
 
                     for i in range(rangeLoops):
@@ -280,7 +263,7 @@ if __name__ == '__main__':
                     for t in threads: 
                      #   t.setDaemon(True)                
                         t.start()
-                       # time.sleep(0.3)  
+      
                     for t in threads:
                         t.join(100)
 
