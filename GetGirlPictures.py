@@ -120,7 +120,9 @@ class downloadImageThread(Thread):
                     #     print(namestr)
                 if not os.path.exists(namestr):
                     request.urlretrieve(url=imgUrl,filename= namestr)
-                print(namestr)
+                    print('下载完成：'+namestr)
+                else:
+                    print('已存在下载文件：'+namestr)
 
                         
         except IOError as identifier:
