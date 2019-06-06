@@ -118,8 +118,8 @@ class downloadImageThread(Thread):
                     #     request.urlretrieve(url=imgUrl,filename= namestr)
                     #     historyList.append(imgUrl) 
                     #     print(namestr)
-
-                request.urlretrieve(url=imgUrl,filename= namestr)
+                if not os.path.exists(namestr):
+                    request.urlretrieve(url=imgUrl,filename= namestr)
                 print(namestr)
 
                         
@@ -178,17 +178,17 @@ if __name__ == '__main__':
     mainUrlLists= getAllMainUrl(htmltxt)
 
     #temp
-    temp=[]
-    for x in range(1,7):
-        temp.append(mainUrlLists[len(mainUrlLists)-x])
-    mainUrlLists=temp
+    # temp=[]
+    # for x in range(1,7):
+    #     temp.append(mainUrlLists[len(mainUrlLists)-x])
+    # mainUrlLists=temp
 
 
     q= Queue()
     historyList=[]
     historyList = readfile()
 
-
+    imgtotal=0
     try:
         #2、循环所有主目录
         for mainurl in mainUrlLists:
@@ -215,6 +215,10 @@ if __name__ == '__main__':
             except Exception as identifier:
                 pass
 
+            #计算图片总数量
+            # for x in urllists:
+            #     imgtotal+=int(countlists[x])
+            # continue  
 
             # 去重
             ##urllists = list(set(urllists))
@@ -241,7 +245,7 @@ if __name__ == '__main__':
             if len(deltemp)>0:
                 for x in deltemp:
                     urllists.remove(x)        
-                        
+                     
             try:
                 #4、循环单页面所有地址   
                 while len(urllists)>0:
@@ -290,8 +294,9 @@ if __name__ == '__main__':
                     # pools.map(getPictureOnePage,threads)
                     # pools.close()                   
                     # pools.join()
-                    
+           
         print("完成后退出")
+        print(imgtotal)
 
     except IOError as e:
         pass
